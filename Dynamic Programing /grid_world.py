@@ -25,22 +25,22 @@ class Grid():
         return state not in self.actions
 
     def move(self,action):
-        if (not self.game_over()) and (action in self.actions[(self.i,self.j)]):
+        if action in self.actions[(self.i,self.j)]:
             if action=='U':
                 self.i-=1;
             elif action=='D':
                 self.i+=1
             elif action=='L':
                 self.j-=1
-            else:
+            elif action == 'R':
                 self.j+=1
         return self.rewards.get((self.i,self.j),0)
 
     def game_over(self):
-        return (self.i,self.j) in self.rewards
+        return (self.i,self.j) not in self.actions
 
     def all_states(self):
-        return set(self.rewards.keys()+self.actions.keys())
+        return set(list(self.rewards.keys())+list(self.actions.keys()))
 
     def draw_grid(self):
         for i in range(self.height):

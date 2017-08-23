@@ -6,23 +6,24 @@ GAMMA = 0.9
 ALL_ACTIONS = ['U','D','R','L']
 
 def print_policy(P, g):
-  for i in xrange(g.width):
-    print "---------------------------"
-    for j in xrange(g.height):
-      a = P.get((i,j), ' ')
-      print("  %s  |" % a,)
-    print("")
+    for i in range(g.height):
+        print("________________________")
+        s=""
+        for j in range(g.width):
+            a = P.get((i,j),' ')
+            s+=str(a)+"  |"
+        print(s)
+    print("________________________")
 
 def print_values(V, g):
-  for i in xrange(g.width):
-    print "---------------------------"
-    for j in xrange(g.height):
-      v = V.get((i,j), 0)
-      if v >= 0:
-        print(" %.2f|" % v,)
-      else:
-        print("%.2f|" % v,) # -ve sign takes up an extra space
-    print("")
+    for i in range(g.height):
+        print("________________________")
+        s=""
+        for j in range(g.width):
+            v = V.get((i,j), 0)
+            s+=str("%.2f|" % v)+"  |"
+        print(s)
+    print("________________________")
 
 if __name__ == '__main__':
     policy={}
@@ -44,12 +45,42 @@ if __name__ == '__main__':
     print("Initial Values")
     print_values(value_function,grid)
 
-    while true:
+    while True:
         #POLICY EVALUATION AND VALUE UPDATE
-        while true:
+        while True:
             biggest_change=0
             for state in grid.all_states():
                 old_val = value_function[state]
-                grid.set_current_state(state)
-                reward = grid.move(policy[state])
-                
+                if state in policy:
+                    grid.set_current_state(state)
+                    reward = grid.move(policy[state])
+                    new_val = reward + GAMMA*value_function[grid.get_state()]
+                    value_function[state]=new_val;
+                    biggest_change = max(biggest_change,np.abs(new_val-old_val))
+            if biggest_change<EPSILON:
+                break
+
+        # CONTROL - POLICY IMPROVEMENT
+        policy_converged = True
+        for state in grid.all_states():
+            if state in policy:
+                old_policy=policy[state]
+                new_policy=None
+                best_value=float('-inf')
+                for action in ALL_ACTIONS:
+                    grid.set_current_state(state)
+                    reward=grid.move(action)
+                    value = reward+GAMMA*value_function[grid.get_state()]
+                    if value>best_value:
+                        best_value=value
+                        new_policy=action
+                policy[state]=new_policy
+                if old_policy!=new_policy:
+                    policy_converged=False
+
+        if policy_converged:
+            break
+    print("Final Value Function")
+    print_values(value_function,grid)
+    print("Final Policy")
+    print_policy(policy,grid)
