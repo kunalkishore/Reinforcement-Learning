@@ -30,7 +30,7 @@ if __name__ == '__main__':
     value={}
     grid = make_grid()
     states=grid.all_states()
-    for state in states:
+    for state in states: 
         if state in grid.actions:
             value[state]=np.random.random()
         else:
